@@ -6,7 +6,7 @@ const passport = require("passport");
 // bring all routes
 const auth = require("./routes/api/auth");
 const profile = require("./routes/api/profile");
-const question = require("./routes/api/question");
+const questions = require("./routes/api/questions");
 const app = express();
 
 //middleare for body-parser
@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 //actual routes
 app.use("/api/auth", auth);
 app.use("/api/profile", profile);
-app.use("/api/question", question);
+app.use("/api/questions", questions);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
