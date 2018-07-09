@@ -103,4 +103,104 @@ router.get("/:username", (req, res) => {
     .catch(err => console.log("Error in fetching username" + err));
 });
 
+//@type GET
+//@route /api/profile/find/evryone
+//@desc route for getting user profile of each user
+//@access PUBLIC
+
+router.get("/find/everyone", (req, res) => {
+  Profile.find()
+    .populate("user", ["name", "profilepic"])
+    .then(profile => {
+      if (!profile) {
+        return res.status(404).json({ usernotfound: "No profile was found" });
+      }
+      res.json(profile);
+    })
+    .catch(err => console.log("Error in user profiles" + err));
+});
+
+//@type DELETE
+//@route /api/profile/
+//@desc route for DELETEING USER BASED ON ID
+//@access PRIVATE
+
+router.delete(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id });
+    Profile.findOneAndRemove({ user: req.user.id })
+      .then(() => {
+        Person.findOneAndRemove({ _id: req.user.id })
+          .then(() => res.json({ success: "delete was success" }))
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  }
+);
+
+//@type POST
+//@route /api/profile/workrole
+//@desc route for adding work profile of aa person
+//@access PRIVATE
+
+router.post(
+  "/workrole",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        if (!profile) {
+          return res.status(404).json({ workroleerror: "profile not found" });
+        }
+
+        const newWork = {
+          role: req.body.role,
+          company: req.body.company,
+          country: req.body.country,
+          from: req.body.from,
+          to: req.body.to,
+          current: req.body.current,
+          details: req.body.details
+        };
+
+        profile.workrole.unshift(newWork);
+        profile
+          .save()
+          .then(profile => res.json(profile))
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  }
+);
+
+//@type DELETE
+//@route /api/profile/workrole/:id
+//@desc route for deleting specific work role
+//@access PRIVATE
+
+router.delete(
+  "/workrole/:w_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        const removethis = profile.workrole
+          .map(item => item.id)
+          .indexOf(req.params.w_id);
+
+        profile.workrole.splice(removethis, 1);
+
+        profile
+          .save()
+          .then(profile => {
+            res.json(profile);
+          })
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  }
+);
+
 module.exports = router;
