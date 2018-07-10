@@ -107,4 +107,39 @@ router.post(
   }
 );
 
+//Asignment
+//delete quetions
+
+//@type DELETE
+//@route /api/questions/:id
+//@desc route to delete question posted by user
+//@access PRIVATE
+
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        Question.findOne({ user: req.user.id })
+          .then(question => {
+            if (!question) {
+              return res
+                .status(404)
+                .json({ questionerror: "question not found" });
+            }
+            Question.findByIdAndRemove(req.params.id)
+              .then(question => res.json(question))
+              .catch(err => console.log(err));
+          })
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  }
+);
+
+//delete all quetions
+
+//Create a separate rout for linux questions
+
 module.exports = router;
