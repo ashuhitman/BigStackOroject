@@ -169,7 +169,7 @@ router.post(
         profile
           .save()
           .then(profile => res.json(profile))
-          .catch(err => console.log(err));
+          .catch(err => console.log("some error in updating workrole" + err));
       })
       .catch(err => console.log(err));
   }

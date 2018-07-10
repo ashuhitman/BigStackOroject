@@ -15,6 +15,8 @@ router.get("/", (req, res) => {
 });
 
 const Question = require("../../models/Question");
+2;
+const Profile = require("../../models/Profile");
 
 //@type POST
 //@route /api/questions
@@ -60,6 +62,45 @@ router.post(
         question
           .save()
           .then(question => res.json(question))
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  }
+);
+
+//@type POST
+//@route /api/questions/upvote/:id
+//@desc route for upvoting questions
+//@access PRIVATE
+
+router.post(
+  "/upvote/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        Question.findById(req.params.id)
+          .then(question => {
+            if (
+              question.upvotes.filter(
+                upvote => upvote.user.toString() === req.user.id.toString()
+              ).length > 0
+            ) {
+              let index = question.upvotes
+                .map(upvote => upvote.user)
+                .indexOf(req.user.id);
+              question.upvotes.splice(index, 1);
+              return question
+                .save()
+                .then(question => res.json(question))
+                .catch(err => console.log("err while downviting" + err));
+            }
+            question.upvotes.unshift({ user: req.user.id });
+            question
+              .save()
+              .then(quetion => res.json(question))
+              .catch(err => console.log(err));
+          })
           .catch(err => console.log(err));
       })
       .catch(err => console.log(err));
